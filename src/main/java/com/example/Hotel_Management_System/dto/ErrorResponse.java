@@ -1,0 +1,22 @@
+package com.example.Hotel_Management_System.dto;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AllArgsConstructor;
+import lombok.Builder;          // ← this is what enables .builder()
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+import java.util.Map;
+
+@Data
+@Builder                        // ← must be here ✅
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class ErrorResponse {
+    private int status;
+    private String message;
+    private Map<String, String> errors;
+    private LocalDateTime timestamp;
+}
