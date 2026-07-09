@@ -58,7 +58,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/admin/**").permitAll()
                         .requestMatchers("/api/rooms/available").permitAll()
                         .requestMatchers("/api/rooms/type/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/rooms/*/images").permitAll()   // NEW: public gallery viewing
+                        .requestMatchers(HttpMethod.GET, "/api/rooms/*/images").permitAll()
                         .requestMatchers("/uploads/**").permitAll()
                         .requestMatchers("/oauth2/**").permitAll()
                         .requestMatchers("/login/oauth2/**").permitAll()

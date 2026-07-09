@@ -18,4 +18,5 @@ public class RoomResponse {
     private Integer capacity;
     private Double price;
     private RoomStatus roomStatus;
+    private String primaryImageUrl;
 }

@@ -46,6 +46,13 @@ public class RoomImageController {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new ResourceNotFoundException("Room not found with id: " + roomId));
 
+        // Enforce single primary: unset any existing primary image for this room
+        if (isPrimary) {
+            List<RoomImage> existingPrimaries = roomImageRepository.findByRoom_RoomIdAndIsPrimaryTrue(roomId);
+            existingPrimaries.forEach(img -> img.setPrimary(false));
+            roomImageRepository.saveAll(existingPrimaries);
+        }
+
         String storedPath = fileStorageService.storeFile(file);
 
         RoomImage image = RoomImage.builder()

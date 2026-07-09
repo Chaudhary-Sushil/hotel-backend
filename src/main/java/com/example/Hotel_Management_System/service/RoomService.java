@@ -3,13 +3,11 @@ package com.example.Hotel_Management_System.service;
 
 import com.example.Hotel_Management_System.dto.RoomRequest;
 import com.example.Hotel_Management_System.dto.RoomResponse;
-import com.example.Hotel_Management_System.entity.BookedStatus;
-import com.example.Hotel_Management_System.entity.Room;
-import com.example.Hotel_Management_System.entity.RoomStatus;
-import com.example.Hotel_Management_System.entity.RoomType;
+import com.example.Hotel_Management_System.entity.*;
 import com.example.Hotel_Management_System.exception.RoomAlreadyExistException;
 import com.example.Hotel_Management_System.exception.RoomNotFoundException;
 import com.example.Hotel_Management_System.repository.BookingRepository;
+import com.example.Hotel_Management_System.repository.RoomImageRepository;
 import com.example.Hotel_Management_System.repository.RoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,6 +23,7 @@ public class RoomService {
 
     private final RoomRepository roomRepository;
     private final BookingRepository bookingRepository;
+    private final RoomImageRepository roomImageRepository;
 
     public RoomResponse addRoom(RoomRequest request) {
 
@@ -144,6 +143,13 @@ public class RoomService {
     }
 
     private RoomResponse toResponse(Room room) {
+
+        String primaryImageUrl = roomImageRepository
+                .findFirstByRoom_RoomIdAndIsPrimaryTrue(room.getRoomId())
+                .or(() -> roomImageRepository.findFirstByRoom_RoomIdOrderByDisplayOrderAsc(room.getRoomId()))
+                .map(RoomImage::getImagePath)
+                .orElse(null);
+
         return RoomResponse.builder()
                 .roomId(room.getRoomId())
                 .roomNumber(room.getRoomNumber())
@@ -151,6 +157,9 @@ public class RoomService {
                 .capacity(room.getCapacity())
                 .price(room.getPrice())
                 .roomStatus(room.getRoomStatus())
+                .primaryImageUrl(primaryImageUrl)
                 .build();
     }
+
+
 }
