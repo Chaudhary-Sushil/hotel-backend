@@ -25,13 +25,19 @@ public class StaffController {
         return ResponseEntity.ok(authService.createStaff(request));
     }
 
-
-
-
-    // ─── ADMIN: GET ALL STAFF ─────────────────────────────────────
+    // ─── ADMIN: GET ALL STAFF (admin-prefixed) ────────────────────
     @GetMapping("/admin/staff")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<?> getAllStaff() {
+        return ResponseEntity.ok(
+                authService.getAllStaff()
+        );
+    }
+
+    // ─── GET ALL STAFF (plain route, matches frontend calls) ──────
+    @GetMapping("/staff")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<?> getAllStaffPlain() {
         return ResponseEntity.ok(
                 authService.getAllStaff()
         );

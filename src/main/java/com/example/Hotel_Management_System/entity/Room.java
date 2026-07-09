@@ -36,4 +36,8 @@ public class Room {
     @Column(nullable = false)
     private Integer capacity;
 
+    @Column(name = "is_deleted", nullable = false)
+    @Builder.Default
+    private boolean isDeleted = false;
+
 }
