@@ -13,5 +13,5 @@ public class OAuth2UserInfo {
     private String email;
     private String firstName;
     private String lastName;
-    private String provider;   // "google" or "github"
+    private String provider;
 }

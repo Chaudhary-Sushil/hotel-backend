@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 import java.util.Map;
 
 @Data
-@Builder                        // ← must be here ✅
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)

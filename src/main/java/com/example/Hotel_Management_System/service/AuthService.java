@@ -108,13 +108,18 @@ public class AuthService {
                 )
         );
 
+        var user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+
         var userDetails = userDetailsService.loadUserByUsername(request.getEmail());
         var accessToken = jwtService.generateToken(userDetails);
-        var refreshToken = refreshTokenService.createRefreshToken(request.getEmail()); // ← added
+        var refreshToken = refreshTokenService.createRefreshToken(request.getEmail());
 
         return AuthResponse.builder()
                 .token(accessToken)
-                .refreshToken(refreshToken.getToken())    // ← added
+                .refreshToken(refreshToken.getToken())
+                .role(user.getRole().name())
+                .firstLogin(user.getFirstLogin())
                 .build();
     }
 

@@ -62,6 +62,12 @@ public class JwtService {
                 .compact();
     }
 
+    public boolean extractFirstLogin(String token) {
+        Claims claims = extractAllClaims(token);
+        Object value = claims.get("firstLogin");
+        return value != null && Boolean.parseBoolean(value.toString());
+    }
+
     // ─── 2. VALIDATE TOKEN ───────────────────────────────────────────
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = extractUsername(token);

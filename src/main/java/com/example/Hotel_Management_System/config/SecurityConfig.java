@@ -23,6 +23,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
+import com.example.Hotel_Management_System.filter.FirstLoginFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -35,6 +36,7 @@ public class SecurityConfig {
     private final UserDetailsServiceImpl userDetailsService;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
     private final JwtAuthEntryPoint jwtAuthEntryPoint;
+    private final FirstLoginFilter firstLoginFilter;
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
@@ -77,6 +79,7 @@ public class SecurityConfig {
                 )
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(firstLoginFilter, JwtAuthFilter.class)
                 .oauth2Login(oauth2 -> oauth2
                         .successHandler(oAuth2SuccessHandler)
                 );

@@ -50,7 +50,7 @@ public class AuthController {
             @Valid @RequestBody LogoutRequest request) {
         authService.logout(request);
         return ResponseEntity.ok(
-                Map.of("message", "Logged out successfully ✅")
+                Map.of("message", "Logged out successfully ")
         );
     }
 
