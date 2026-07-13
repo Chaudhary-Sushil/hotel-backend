@@ -57,7 +57,6 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/admin/**").permitAll()
                         .requestMatchers("/api/rooms/available").permitAll()
                         .requestMatchers("/api/rooms/type/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/rooms/*/images").permitAll()
