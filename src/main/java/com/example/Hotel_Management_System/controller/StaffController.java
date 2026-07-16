@@ -6,8 +6,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -41,5 +39,22 @@ public class StaffController {
         return ResponseEntity.ok(
                 authService.getAllStaff()
         );
+    }
+
+    // ─── ADMIN: UPDATE STAFF ───────────────────────────────────────
+    @PutMapping("/staff/{id}")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<StaffResponse> updateStaff(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateStaffRequest request) {
+        return ResponseEntity.ok(authService.updateStaff(id, request));
+    }
+
+    // ─── ADMIN: DELETE STAFF (hard delete) ─────────────────────────
+    @DeleteMapping("/staff/{id}")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<Void> deleteStaff(@PathVariable Long id) {
+        authService.deleteStaff(id);
+        return ResponseEntity.noContent().build();
     }
 }

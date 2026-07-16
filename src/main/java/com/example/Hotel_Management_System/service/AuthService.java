@@ -7,6 +7,7 @@ import com.example.Hotel_Management_System.exception.UserAlreadyExistsException;
 import com.example.Hotel_Management_System.exception.UserNotFoundException;
 import com.example.Hotel_Management_System.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -126,25 +127,25 @@ public class AuthService {
 
 
     // ─── REFRESH ─────────────────────────────────────────────────────
-        public AuthResponse refresh(RefreshTokenRequest request) {
+    public AuthResponse refresh(RefreshTokenRequest request) {
 
-            // 1. find the refresh token in DB
-            RefreshToken refreshToken = refreshTokenService.findByToken(request.getRefreshToken());
+        // 1. find the refresh token in DB
+        RefreshToken refreshToken = refreshTokenService.findByToken(request.getRefreshToken());
 
-            // 2. check it hasn't expired
-            refreshTokenService.verifyExpiration(refreshToken);
+        // 2. check it hasn't expired
+        refreshTokenService.verifyExpiration(refreshToken);
 
-            // 3. generate new access token from the user attached to refresh token
-            var userDetails = userDetailsService
-                    .loadUserByUsername(refreshToken.getUser().getEmail());
+        // 3. generate new access token from the user attached to refresh token
+        var userDetails = userDetailsService
+                .loadUserByUsername(refreshToken.getUser().getEmail());
 
-            var newAccessToken = jwtService.generateToken(userDetails);
+        var newAccessToken = jwtService.generateToken(userDetails);
 
-            return AuthResponse.builder()
-                    .token(newAccessToken)
-                    .refreshToken(refreshToken.getToken())   // same refresh token
-                    .build();
-        }
+        return AuthResponse.builder()
+                .token(newAccessToken)
+                .refreshToken(refreshToken.getToken())   // same refresh token
+                .build();
+    }
 
     public void logout(LogoutRequest request) {
 
@@ -207,18 +208,64 @@ public class AuthService {
     }
 
 
-    public List<CreateStaffResponse> getAllStaff() {
+    public List<StaffResponse> getAllStaff() {
         return staffRepository.findAll()
                 .stream()
-                .map(staff -> CreateStaffResponse.builder()
-                        .id(staff.getId())
-                        .firstName(staff.getFirstName())
-                        .lastName(staff.getLastName())
-                        .email(staff.getEmail())
-                        .employeeId(staff.getEmployeeId())
-                        .role(staff.getRole().name())
-                        .build())
+                .map(this::toStaffResponse)
                 .collect(Collectors.toList());
+    }
+
+    // ─── UPDATE STAFF (Admin only) ─────────────────────────────────────
+    public StaffResponse updateStaff(Long id, UpdateStaffRequest request) {
+        var staff = staffRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("Staff not found with id: " + id));
+
+        // if the email is changing, make sure it isn't already taken by someone else
+        if (!staff.getEmail().equalsIgnoreCase(request.getEmail())
+                && staffRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new UserAlreadyExistsException(
+                    "Email already registered: " + request.getEmail()
+            );
+        }
+
+        staff.setFirstName(request.getFirstName());
+        staff.setLastName(request.getLastName());
+        staff.setEmail(request.getEmail());
+        staff.setPhoneNumber(request.getPhoneNumber());
+        staff.setDateOfBirth(request.getDateOfBirth());
+
+        staffRepository.save(staff);
+
+        return toStaffResponse(staff);
+    }
+
+    // ─── DELETE STAFF (Admin only) — hard delete ───────────────────────
+    public void deleteStaff(Long id) {
+        if (!staffRepository.existsById(id)) {
+            throw new UserNotFoundException("Staff not found with id: " + id);
+        }
+        try {
+            staffRepository.deleteById(id);
+        } catch (DataIntegrityViolationException ex) {
+            throw new IllegalStateException(
+                    "Cannot delete this staff member — they are referenced by existing records."
+            );
+        }
+    }
+
+    private StaffResponse toStaffResponse(Staff staff) {
+        return StaffResponse.builder()
+                .id(staff.getId())
+                .employeeId(staff.getEmployeeId())
+                .firstName(staff.getFirstName())
+                .lastName(staff.getLastName())
+                .email(staff.getEmail())
+                .phoneNumber(staff.getPhoneNumber())
+                .role(staff.getRole().name())
+                .dateOfBirth(staff.getDateOfBirth())
+                .joinDate(staff.getJoinDate())
+                .isActive(staff.getIsActive())
+                .build();
     }
 
     // ─── CHANGE PASSWORD ──────────────────────────────────────────────

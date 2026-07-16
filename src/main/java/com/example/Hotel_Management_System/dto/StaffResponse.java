@@ -1,19 +1,15 @@
 package com.example.Hotel_Management_System.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 public class StaffResponse {
-
     private Long id;
     private String employeeId;
     private String firstName;
