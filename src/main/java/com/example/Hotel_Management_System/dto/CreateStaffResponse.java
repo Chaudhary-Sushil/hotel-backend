@@ -13,6 +13,6 @@ public class CreateStaffResponse {
     private String email;
     private String employeeId;
     private String role;
-    private String temporaryPassword;  // ← shown once ✅
+    private String temporaryPassword;
     private String message;
 }
