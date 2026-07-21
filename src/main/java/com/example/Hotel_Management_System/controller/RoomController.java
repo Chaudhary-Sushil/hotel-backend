@@ -44,13 +44,12 @@ public class RoomController {
     }
 
     @PatchMapping("/{roomId}/status")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_RECEPTIONIST')")
     public ResponseEntity<String> updateRoomStatus(
             @PathVariable Long roomId,
             @RequestParam RoomStatus roomStatus) {
         return ResponseEntity.ok(roomService.updateRoomStatus(roomId, roomStatus));
     }
-
     // ─── READ OPERATIONS ──────────────────────────────────────────
     @GetMapping
     public ResponseEntity<List<RoomResponse>> getAllRooms() {

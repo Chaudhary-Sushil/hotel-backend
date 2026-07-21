@@ -192,6 +192,16 @@ public class AuthService {
                 .role(Role.valueOf(request.getRole()))
                 .build();
 
+        java.util.Set<Permission> defaultPermissions = new java.util.HashSet<>();
+        if (staff.getRole() == Role.ROLE_ADMIN) {
+            defaultPermissions.addAll(java.util.Arrays.asList(Permission.values()));
+        } else if (staff.getRole() == Role.ROLE_RECEPTIONIST) {
+            defaultPermissions.add(Permission.MANAGE_BOOKINGS);
+            defaultPermissions.add(Permission.MANAGE_ROOMS);
+            defaultPermissions.add(Permission.MANAGE_PAYMENTS);
+        }
+        staff.setPermissions(defaultPermissions);
+
         staffRepository.save(staff);
 
         return CreateStaffResponse.builder()
@@ -204,6 +214,9 @@ public class AuthService {
                 .temporaryPassword(tempPassword)  // ← return once ✅
                 .message("Staff created successfully! " +
                         "Share credentials securely.")
+                .permissions(staff.getPermissions() != null
+                        ? staff.getPermissions().stream().map(Enum::name).collect(Collectors.toSet())
+                        : new java.util.HashSet<>())
                 .build();
     }
 
@@ -253,6 +266,14 @@ public class AuthService {
         }
     }
 
+    public StaffResponse updateStaffPermissions(Long id, java.util.Set<Permission> permissions) {
+        var staff = staffRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("Staff not found with id: " + id));
+        staff.setPermissions(permissions);
+        staffRepository.save(staff);
+        return toStaffResponse(staff);
+    }
+
     private StaffResponse toStaffResponse(Staff staff) {
         return StaffResponse.builder()
                 .id(staff.getId())
@@ -265,6 +286,9 @@ public class AuthService {
                 .dateOfBirth(staff.getDateOfBirth())
                 .joinDate(staff.getJoinDate())
                 .isActive(staff.getIsActive())
+                .permissions(staff.getPermissions() != null
+                        ? staff.getPermissions().stream().map(Enum::name).collect(Collectors.toSet())
+                        : new java.util.HashSet<>())
                 .build();
     }
 

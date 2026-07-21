@@ -1,6 +1,7 @@
 package com.example.Hotel_Management_System.dto;
 
 import lombok.*;
+import java.util.Set;
 
 @Data
 @Builder
@@ -15,4 +16,5 @@ public class CreateStaffResponse {
     private String role;
     private String temporaryPassword;
     private String message;
+    private Set<String> permissions;
 }

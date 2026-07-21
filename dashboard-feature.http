@@ -1,0 +1,75 @@
+### ============================================================
+### Feature 1 — Analytics Dashboard — HTTP Test Requests
+### ============================================================
+### Usage: Open in VS Code REST Client extension or IntelliJ HTTP Client.
+### Replace {{token}} with a valid JWT for ROLE_ADMIN or ROLE_RECEPTIONIST.
+### ============================================================
+
+@baseUrl = http://localhost:8080/api
+@token = YOUR_JWT_TOKEN_HERE
+
+### ─── AUTH (get a token first) ───────────────────────────────
+
+### Login as Admin
+# @name loginAdmin
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@hotel.com",
+  "password": "yourPassword"
+}
+
+###
+
+### ─── DASHBOARD ENDPOINTS ────────────────────────────────────
+
+### 1. GET /api/dashboard/summary
+### Returns: totalRooms, occupiedRooms, availableRooms, occupancyRate,
+###          todayCheckIns, todayCheckOuts, activeBookings
+GET {{baseUrl}}/dashboard/summary
+Authorization: Bearer {{token}}
+
+###
+
+### 2. GET /api/dashboard/revenue?range=7d
+### Returns: array of { date, revenue } for the last 7 days (PAID only)
+GET {{baseUrl}}/dashboard/revenue?range=7d
+Authorization: Bearer {{token}}
+
+###
+
+### 3. GET /api/dashboard/revenue?range=30d
+### Returns: array of { date, revenue } for the last 30 days
+GET {{baseUrl}}/dashboard/revenue?range=30d
+Authorization: Bearer {{token}}
+
+###
+
+### 4. GET /api/dashboard/booking-status-breakdown
+### Returns: array of { status, count } grouped by BookedStatus
+GET {{baseUrl}}/dashboard/booking-status-breakdown
+Authorization: Bearer {{token}}
+
+###
+
+### 5. GET /api/dashboard/recent-activity
+### Returns: top 5 most recent events (bookings + payments merged by timestamp)
+GET {{baseUrl}}/dashboard/recent-activity
+Authorization: Bearer {{token}}
+
+###
+
+### ─── NEGATIVE TESTS ────────────────────────────────────────
+
+### 6. Access summary as GUEST → should return 403 Forbidden
+### (use a guest JWT here)
+GET {{baseUrl}}/dashboard/summary
+Authorization: Bearer GUEST_JWT_HERE
+
+###
+
+### 7. Access summary with no token → should return 401 Unauthorized
+GET {{baseUrl}}/dashboard/summary
+
+###

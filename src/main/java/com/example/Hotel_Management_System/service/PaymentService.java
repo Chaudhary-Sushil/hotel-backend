@@ -90,6 +90,27 @@ public class PaymentService {
         return buildPaymentResponse(payment);
     }
 
+    // ─── REFUND PAYMENT ─────────────────────────────────────────────
+    public PaymentResponse refundPayment(Long paymentId) {
+
+        var payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new PaymentNotFoundException(
+                        "Payment not found: " + paymentId
+                ));
+
+        // Can only refund a payment that was actually paid
+        if (payment.getPaymentStatus() != PaymentStatus.PAID) {
+            throw new RoomNotAvailableException(
+                    "Only a PAID payment can be refunded"
+            );
+        }
+
+        payment.setPaymentStatus(PaymentStatus.REFUNDED);
+        paymentRepository.save(payment);
+
+        return buildPaymentResponse(payment);
+    }
+
     // ─── GET ALL PAYMENTS ─────────────────────────────────────────
     public List<PaymentResponse> getAllPayments() {
         return paymentRepository.findAll()
@@ -128,6 +149,56 @@ public class PaymentService {
         return buildPaymentResponse(payment);
     }
 
+    // ─── GENERATE QR CODE ─────────────────────────────────────────
+    public byte[] getPaymentQrCode(Long bookingId) {
+        var booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new BookingNotFoundException("Booking not found: " + bookingId));
+
+        var payment = paymentRepository.findByBooking(booking)
+                .orElseThrow(() -> new PaymentNotFoundException("Payment not found for booking: " + bookingId));
+
+        if (payment.getQrToken() == null || payment.getQrToken().isEmpty()) {
+            payment.setQrToken(java.util.UUID.randomUUID().toString());
+            paymentRepository.save(payment);
+        }
+
+        // We can encode an internal confirmation link or a UPI intent string.
+        // E.g., a mock gateway callback link: http://localhost:8080/api/payments/pay/confirm/{token}
+        String qrContent = "http://localhost:8080/api/payments/pay/confirm/" + payment.getQrToken();
+        try {
+            return com.example.Hotel_Management_System.util.QrCodeGenerator.generateQrCode(qrContent, 250, 250);
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to generate QR Code", e);
+        }
+    }
+
+    // ─── CONFIRM PAYMENT BY BOOKING ID ────────────────────────────
+    public PaymentResponse confirmPayment(Long bookingId) {
+        var booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new BookingNotFoundException("Booking not found: " + bookingId));
+
+        var payment = paymentRepository.findByBooking(booking)
+                .orElseThrow(() -> new PaymentNotFoundException("Payment not found for booking: " + bookingId));
+
+        payment.setPaymentStatus(PaymentStatus.PAID);
+        payment.setPaidDate(LocalDateTime.now());
+        paymentRepository.save(payment);
+
+        return buildPaymentResponse(payment);
+    }
+
+    // ─── CONFIRM PAYMENT BY TOKEN ─────────────────────────────────
+    public PaymentResponse confirmPaymentByToken(String token) {
+        var payment = paymentRepository.findByQrToken(token)
+                .orElseThrow(() -> new PaymentNotFoundException("Payment not found for QR token: " + token));
+
+        payment.setPaymentStatus(PaymentStatus.PAID);
+        payment.setPaidDate(LocalDateTime.now());
+        paymentRepository.save(payment);
+
+        return buildPaymentResponse(payment);
+    }
+
     // ─── HELPER METHOD ────────────────────────────────────────────
     private PaymentResponse buildPaymentResponse(Payment payment) {
         return PaymentResponse.builder()
@@ -142,6 +213,7 @@ public class PaymentService {
                 .paymentMethod(payment.getPaymentMethod())
                 .paymentStatus(payment.getPaymentStatus())
                 .paidDate(payment.getPaidDate())
+                .qrToken(payment.getQrToken())
                 .build();
     }
 }

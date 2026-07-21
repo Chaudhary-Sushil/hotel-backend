@@ -27,4 +27,5 @@ public class PaymentResponse {
     private PaymentMethod paymentMethod;
     private PaymentStatus paymentStatus;
     private LocalDateTime paidDate;
+    private String qrToken;
 }

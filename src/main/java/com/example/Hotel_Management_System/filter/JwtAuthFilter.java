@@ -28,7 +28,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserDetailsServiceImpl userDetailsService;
-    private final BlacklistService blacklistService;        // ← add this
+    private final BlacklistService blacklistService;
 
     @Override
     protected void doFilterInternal(

@@ -17,4 +17,12 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
     List<Room> findAllByIsDeletedFalse();
     List<Room> findByRoomStatusAndIsDeletedFalse(RoomStatus roomStatus);
     List<Room> findByRoomTypeAndIsDeletedFalse(RoomType roomType);
+
+    // ─── DASHBOARD COUNT HELPERS ─────────────────────────────────────
+
+    /** Total non-deleted rooms */
+    long countByIsDeletedFalse();
+
+    /** Non-deleted rooms by specific status */
+    long countByRoomStatusAndIsDeletedFalse(RoomStatus status);
 }

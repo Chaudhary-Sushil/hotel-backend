@@ -2,11 +2,14 @@ package com.example.Hotel_Management_System.controller;
 
 import com.example.Hotel_Management_System.dto.*;
 import com.example.Hotel_Management_System.service.AuthService;
+import com.example.Hotel_Management_System.entity.Permission;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api")
@@ -48,6 +51,15 @@ public class StaffController {
             @PathVariable Long id,
             @Valid @RequestBody UpdateStaffRequest request) {
         return ResponseEntity.ok(authService.updateStaff(id, request));
+    }
+
+    // ─── ADMIN: UPDATE STAFF PERMISSIONS ────────────────────────────
+    @PutMapping("/staff/{id}/permissions")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<StaffResponse> updateStaffPermissions(
+            @PathVariable Long id,
+            @RequestBody Set<Permission> permissions) {
+        return ResponseEntity.ok(authService.updateStaffPermissions(id, permissions));
     }
 
     // ─── ADMIN: DELETE STAFF (hard delete) ─────────────────────────

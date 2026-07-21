@@ -41,6 +41,8 @@ public class Payment {
 
     private LocalDateTime paidDate;
 
+    private String qrToken;
+
     @Column(updatable = false, nullable = false)
     private LocalDateTime createdAt;
 

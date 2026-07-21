@@ -37,9 +37,16 @@ public class JwtService {
 
         extraClaims.put("role", userDetails.getAuthorities()
                 .stream()
+                .filter(a -> a.getAuthority().startsWith("ROLE_"))
                 .findFirst()
                 .map(a -> a.getAuthority())
                 .orElse("ROLE_GUEST"));
+
+        extraClaims.put("permissions", userDetails.getAuthorities()
+                .stream()
+                .map(a -> a.getAuthority())
+                .filter(auth -> !auth.startsWith("ROLE_"))
+                .toList());
 
         var user = userRepository.findByEmail(
                 userDetails.getUsername()

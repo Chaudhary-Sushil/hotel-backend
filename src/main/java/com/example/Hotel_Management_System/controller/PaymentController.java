@@ -43,6 +43,15 @@ public class PaymentController {
         return ResponseEntity.ok(paymentService.getAllPayments());
     }
 
+    // ─── REFUND PAYMENT ─────────────────────────────────────────────
+    @PatchMapping("/{paymentId}/refund")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN') or (hasAuthority('ROLE_RECEPTIONIST') and hasAuthority('MANAGE_PAYMENTS'))")
+    public ResponseEntity<PaymentResponse> refundPayment(
+            @PathVariable Long paymentId) {
+        return ResponseEntity.ok(paymentService.refundPayment(paymentId));
+    }
+
+
     // ─── GET MY PAYMENTS ──────────────────────────────────────────
     @GetMapping("/my-payments")
     @PreAuthorize("hasAuthority('ROLE_GUEST')")
@@ -59,5 +68,34 @@ public class PaymentController {
     public ResponseEntity<PaymentResponse> getPaymentByBooking(
             @PathVariable Long bookingId) {
         return ResponseEntity.ok(paymentService.getPaymentByBooking(bookingId));
+    }
+
+    // ─── GENERATE QR CODE (PNG) ───────────────────────────────────
+    @GetMapping(value = "/{bookingId}/qr", produces = org.springframework.http.MediaType.IMAGE_PNG_VALUE)
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_RECEPTIONIST', 'ROLE_GUEST')")
+    public ResponseEntity<byte[]> getPaymentQr(@PathVariable Long bookingId) {
+        byte[] qrBytes = paymentService.getPaymentQrCode(bookingId);
+        return ResponseEntity.ok()
+                .contentType(org.springframework.http.MediaType.IMAGE_PNG)
+                .body(qrBytes);
+    }
+
+    // ─── MOCK GATEWAY Webhook Callback ─────────────────────────────
+    // Simulates an external payment gateway webhook callback that confirms the payment.
+    @PostMapping("/{bookingId}/confirm")
+    public ResponseEntity<PaymentResponse> confirmPayment(@PathVariable Long bookingId) {
+        return ResponseEntity.ok(paymentService.confirmPayment(bookingId));
+    }
+
+    // ─── SCAN QR Webhook / Confirm by QR Token ──────────────────────
+    @GetMapping("/pay/confirm/{token}")
+    public ResponseEntity<String> confirmPaymentByTokenGet(@PathVariable String token) {
+        paymentService.confirmPaymentByToken(token);
+        return ResponseEntity.ok("<h3>Payment Confirmed Successfully!</h3><p>You can close this tab and return to the application.</p>");
+    }
+
+    @PostMapping("/pay/confirm/{token}")
+    public ResponseEntity<PaymentResponse> confirmPaymentByTokenPost(@PathVariable String token) {
+        return ResponseEntity.ok(paymentService.confirmPaymentByToken(token));
     }
 }

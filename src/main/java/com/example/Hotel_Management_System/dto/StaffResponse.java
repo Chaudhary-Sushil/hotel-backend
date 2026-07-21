@@ -4,6 +4,7 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Data
 @Builder
@@ -20,4 +21,5 @@ public class StaffResponse {
     private LocalDate dateOfBirth;
     private LocalDateTime joinDate;
     private Boolean isActive;
+    private Set<String> permissions;
 }
